@@ -1,35 +1,9 @@
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const SequenceModule = require("./Sequence");
 const Helper = require("../../plugins/helper");
 const moment = require("moment");
 
-const profession = new mongoose.Schema({
-	profession_id: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "profession"
-	}
-});
-const topic = new mongoose.Schema({
-	topic_id: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "appointment_topic"
-	}
-});
-const interest = new mongoose.Schema({
-	interests_id: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "interests"
-	}
-});
-
-const language = new mongoose.Schema({
-	language_id: {
-		type: mongoose.Schema.Types.ObjectId,
-		ref: "language"
-	}
-});
 const userSchema = new mongoose.Schema(
 	{
 		fullname: {
@@ -44,10 +18,6 @@ const userSchema = new mongoose.Schema(
 		email_verified: {
 			type: Boolean,
 			default: false
-		},
-		total: {
-			type: Number,
-			default: 0
 		},
 		count_forgot_password: {
 			type: Number,
@@ -66,11 +36,6 @@ const userSchema = new mongoose.Schema(
 			type: Number,
 			required: false,
 			default: 1
-		},
-		star_avg: {
-			type: Number,
-			required: false,
-			default: 0
 		},
 		verify: {
 			type: Boolean,
@@ -92,70 +57,6 @@ const userSchema = new mongoose.Schema(
 			required: false,
 			default: ""
 		},
-		company: {
-			type: String,
-			required: false,
-			default: ""
-		},
-		introduce: {
-			type: String,
-			required: false,
-			default: ""
-		},
-		notification: {
-			type: Boolean,
-			default: true
-		},
-		phone: {
-			type: String,
-			required: false,
-			default: ""
-		},
-		referral_code: {
-			type: String,
-			required: false,
-			default: ""
-		},
-		system_commission: {
-			type: Number,
-			default: 20
-		},
-		giving_commission: {
-			type: Number,
-			default: 20
-		},
-		affiliate_percent: {
-			type: Number,
-			default: 5
-		},
-		affiliate: {
-			type: String,
-			required: false,
-			default: ""
-		},
-		affiliate_code: {
-			type: String,
-			required: false,
-			default: ""
-		},
-		policy: {
-			type: Boolean,
-			default: false
-		},
-		language: {
-			type: mongoose.Schema.Types.ObjectId,
-			required: false,
-			ref: "language"
-		},
-		languages: [language],
-		status: {
-			type: String,
-			required: false,
-			default: "new" //close
-		},
-		interests: [interest],
-		topics: [topic],
-		professions: [profession],
 		salt: {
 			type: String,
 			required: true
@@ -168,10 +69,7 @@ const userSchema = new mongoose.Schema(
 			type: Number,
 			default: Math.round(new Date().getTime() / 1000)
 		},
-		notes: {
-			type: Array,
-			default: []
-		},
+
 		green_tick: {
 			type: Boolean,
 			default: false
@@ -183,14 +81,6 @@ const userSchema = new mongoose.Schema(
 		uid: {
 			type: String,
 			default: ""
-		},
-		sum_rate: {
-			type: Number,
-			default: 0
-		},
-		count_rate: {
-			type: Number,
-			default: 0
 		}
 	},
 	{
@@ -264,29 +154,13 @@ userSchema.methods.jsonData = function () {
 		coverimage: this.coverimage,
 		birthday: this.birthday,
 		verify: this.verify,
-		place: this.place,
-		star_avg: this.star_avg,
-		company: this.company,
-		topics: this.topics,
-		interests: this.interests,
-		introduce: this.introduce,
-		phone: this.phone,
-		referral_code: this.referral_code,
-		affiliate: this.affiliate,
-		total: this.total,
-		policy: this.policy,
 		uid: this.uid,
 		green_tick: this.green_tick,
 		type_login: this.type_login,
-		languages: this.languages,
-		language: this.language,
-		status: this.status,
 		created_time: this.created_time,
 		updated_time: this.updated_time,
 		created_at: this.created_at,
-		updated_at: this.updated_at,
-		professions: this.professions,
-		notification: this.notification
+		updated_at: this.updated_at
 	};
 };
 
@@ -304,13 +178,11 @@ userSchema
 	});
 
 userSchema.pre(/(updateOne|findOneAndUpdate)/, async function (done) {
-	// let record = await this.model.findOne(this.getQuery());
 	this.set({ updated_time: Math.round(new Date().getTime() / 1000) });
 	done();
 });
 
 userSchema.pre("save", async function (done) {
-	// this.url = this._id;
 	this.created_time = Math.round(new Date().getTime() / 1000);
 	this.created_at = moment
 		.utc(this.created_at, "MM-DD-YYYY")

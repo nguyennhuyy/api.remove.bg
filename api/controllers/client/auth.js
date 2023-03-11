@@ -6,26 +6,13 @@ const Fetch = require("../../../plugins/fetch");
 class AuthController {
 	static async register(req, res) {
 		try {
-			if (req.body.affiliate && req.body.affiliate.trim()) {
-				let user = await UserModel.findOne({
-					email: req.body.affiliate.trim().toLowerCase()
-				});
-				if (
-					!user ||
-					req.body.affiliate.trim().toLowerCase() ===
-						req.body.email.trim().toLowerCase()
-				)
-					return res.status(404).send({ error: "referral-code-not-found" });
-				req.body.affiliate = user._id.toString();
-			}
+			console.log(">>> body", req.body);
 			await register.validateAsync(req.body);
 			let user_exits = await UserModel.findOne({
 				email: req.body.email.trim().toLowerCase()
 			});
 			if (user_exits) return res.status(422).send({ error: "email-exits" });
 
-			let language = await LanguageModel.findOne({ locale: "vi" });
-			req.body.language = language._id;
 			let user_model = new UserModel(req.body);
 			user_model.setPassword(req.body.password);
 			return user_model
@@ -46,10 +33,9 @@ class AuthController {
 	static async login(req, res) {
 		try {
 			await login.validateAsync(req.body);
-			let setting = await SettingModel.findOne({});
 			let user = await UserModel.findOne({
 				email: req.body.email.trim().toLowerCase()
-			}).populate(["professions.profession_id"]);
+			});
 			if (!user || user.status === "close")
 				return res.status(404).send({ error: "user-not-found" });
 

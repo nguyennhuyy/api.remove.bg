@@ -24,13 +24,6 @@ const isRevokedCallbackUser = async function (req, payload, done) {
 			user_id: payload.id
 		};
 		if (payload.time) options.time = payload.time;
-
-		// let check_token_log = await TokenLogModel.findOne(options).sort({
-		// 	created_at: -1
-		// });
-		// if (check_token_log && (!payload.time || !check_token_log.status))
-		// 	throw new Error("Has an error");
-
 		return done(null);
 	} catch (error) {
 		return done({ status: 401, error });

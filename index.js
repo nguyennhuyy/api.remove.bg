@@ -11,7 +11,7 @@ const server = http.createServer((req, res) => {
 	res.statusCode = 200;
 });
 require("dotenv").config({
-	path: "/.env"
+	path: "./.env"
 });
 global.appRoot = path.resolve(__dirname);
 db();
