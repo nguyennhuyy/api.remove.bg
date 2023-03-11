@@ -5,8 +5,9 @@ const UserModel = require("../../models/User");
 const Fetch = require("../../../plugins/fetch");
 class AuthController {
 	static async register(req, res) {
+		console.log(">>> chay vao day 12");
+		console.log(">>> body", req.body);
 		try {
-			console.log(">>> body", req.body);
 			await register.validateAsync(req.body);
 			let user_exits = await UserModel.findOne({
 				email: req.body.email.trim().toLowerCase()
@@ -325,6 +326,14 @@ class AuthController {
 			return res.status(200).send({ message: "user-phone-verified" });
 		} catch (error) {
 			console.log(error);
+			return res.status(400).send(error);
+		}
+	}
+	static async getAccount(req, res) {
+		try {
+			let user = await UserModel.find();
+			if (user) return res.status(200).send(user);
+		} catch (error) {
 			return res.status(400).send(error);
 		}
 	}

@@ -8,7 +8,7 @@ const jwt = require("jsonwebtoken");
 const path = require("path");
 const http = require("http");
 const server = http.createServer((req, res) => {
-	res.statusCode = 200;
+	// res.statusCode = 200;
 });
 require("dotenv").config({
 	path: "./.env"
