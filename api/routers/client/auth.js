@@ -1,6 +1,7 @@
 const express = require("express");
 const AuthController = require("../../controllers/client/auth");
 const Auth = express.Router();
+
 Auth.post("/auth/register", AuthController.register);
 Auth.post("/auth/login", AuthController.login);
 Auth.post("/auth/facebook/login", AuthController.loginFacebook);

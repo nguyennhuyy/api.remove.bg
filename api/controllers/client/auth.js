@@ -5,54 +5,46 @@ const UserModel = require("../../models/User");
 const Fetch = require("../../../plugins/fetch");
 class AuthController {
 	static async register(req, res) {
-		console.log(">>> chay vao day 12");
-		console.log(">>> body", req.body);
+		let { email, fullname, password } = req.body;
 		try {
 			await register.validateAsync(req.body);
 			let user_exits = await UserModel.findOne({
-				email: req.body.email.trim().toLowerCase()
+				email: email.trim().toLowerCase()
 			});
-			if (user_exits) return res.status(422).send({ error: "email-exits" });
-
-			let user_model = new UserModel(req.body);
-			user_model.setPassword(req.body.password);
-			return user_model
-				.save()
-				.then(async user => {
-					return res
-						.status(200)
-						.send({ fullname: req.body.fullname, email: req.body.email });
-				})
-				.catch(error => {
-					return res.status(422).send({ error: "email-exits" });
+			if (user_exits) return res.status(422).send("user-exists");
+			let user = new UserModel(req.body);
+			user.setPassword(password);
+			user.save().then(() => {
+				return res.status(200).send({
+					fullname,
+					email
 				});
+			});
 		} catch (error) {
-			console.log(error);
 			return res.status(400).send(error);
 		}
 	}
 	static async login(req, res) {
+		let { email, password, remember } = req.body;
 		try {
 			await login.validateAsync(req.body);
 			let user = await UserModel.findOne({
-				email: req.body.email.trim().toLowerCase()
+				email: email.trim().toLowerCase()
 			});
 			if (!user || user.status === "close")
 				return res.status(404).send({ error: "user-not-found" });
 
-			if (!user.validatePassword(req.body.password))
+			if (!user.validatePassword(password))
 				return res.status(400).send({
 					error: "user-incorrect-password"
 				});
 
 			let token = await AuthController.generateToken(
 				{ id: user._id, email: user.email },
-				req.body.remember
+				remember
 			);
 			let data = user.jsonData();
 			data.token = token;
-			data.need_otp = setting.need_otp;
-
 			return res.status(200).send(data);
 		} catch (error) {
 			console.log(error);
@@ -305,13 +297,6 @@ class AuthController {
 		const secret = process.env.JWT_SECRET_USER;
 		const options = { expiresIn };
 		try {
-			let check_token_log = await TokenLogModel.findOne({
-				user_id: payload.id,
-				status: true
-			}).sort({
-				created_at: -1
-			});
-			if (check_token_log) payload.time = check_token_log.time;
 			const token = jwt.sign(payload, secret, options);
 			return token;
 		} catch (error) {

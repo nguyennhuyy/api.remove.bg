@@ -187,12 +187,6 @@ userSchema.pre("save", async function (done) {
 	this.created_at = moment
 		.utc(this.created_at, "MM-DD-YYYY")
 		.format("YYYY-MM-DD");
-	if (this.isNew) {
-		let Sequence = new SequenceModule("user");
-		let next_val = await Sequence.nextVal();
-
-		this.referral_code = `${next_val}${Helper.randomCode(3)}`;
-	}
 	done();
 });
 

@@ -16,19 +16,10 @@ const register = Joi.object({
 		.min(6)
 		.max(100)
 		.required(),
-	password: Joi.string().min(6).required(),
-	phone: Joi.string().regex(
-		/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im
-	),
-	affiliate: Joi.string().max(200).allow("")
+	password: Joi.string().min(6).required()
 }).required();
 
 const login = Joi.object({
-	// email: Joi.string()
-	//   .regex(
-	//     /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-	//   )
-	//   .required(),
 	email: Joi.string()
 		.regex(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/)
 		.required(),
