@@ -58,7 +58,6 @@ class AuthController {
 				error: "access-token-is-require"
 			});
 		try {
-			let setting = await SettingModel.findOne({});
 			let data_facebook = await Fetch.get({
 				path: `https://graph.facebook.com/me?fields=email,name,picture&access_token=${access_token}`
 			});
@@ -83,23 +82,9 @@ class AuthController {
 					uid: data_facebook.id
 				};
 
-				let language = await LanguageModel.findOne({ locale: "vi" });
-				user_data.language = language._id;
 				let new_user = new UserModel(user_data);
 				new_user.setPassword(user_data.password);
 				user = await new_user.save();
-
-				if (user.email && setting.send_mail) {
-					let emailModule = new EmailModule(
-						"register_account",
-						"vi",
-						user_data.email
-					);
-					await emailModule.send_email({
-						full_name: user_data.fullname,
-						email: user_data.email
-					});
-				}
 			} else {
 				let data_update = {};
 				!user.uid && (data_update.uid = data_facebook.user);
@@ -120,91 +105,6 @@ class AuthController {
 			let data = user.jsonData();
 			data.token = token;
 			data.first_login = first_login;
-			data.need_otp = setting.need_otp;
-			return res.status(200).send(data);
-		} catch (error) {
-			console.log(error);
-			return res.status(400).send(error);
-		}
-	}
-	static async loginApple(req, res) {
-		let { data_login } = req.body;
-		if (!data_login)
-			return res.status(422).send({
-				error: "data-login-is-require"
-			});
-		try {
-			let setting = await SettingModel.findOne({});
-			let data_apple = await appleSigninAuth.verifyIdToken(
-				data_login.identityToken,
-				{
-					nonce: data_login.nonce
-						? crypto.createHash("sha256").update(data_login.nonce).digest("hex")
-						: undefined
-				}
-			);
-			if (!data_apple.sub)
-				return res.status(422).send({
-					error: "apple-login-failed"
-				});
-
-			let user = await UserModel.findOne({
-				$or: [
-					{ email: data_apple.email },
-					{ uid: data_apple.sub, type_login: "apple" }
-				]
-			});
-			let first_login = !user;
-			if (!user) {
-				let user_data = {
-					email: data_apple.email,
-					password: data_apple.sub,
-					fullname:
-						data_login.fullName.familyName || data_apple.sub.slice(0, 10),
-					type_login: "apple",
-					uid: data_apple.sub,
-					email_verified: true
-				};
-
-				let language = await LanguageModel.findOne({ locale: "vi" });
-				user_data.language = language._id;
-				let new_user = new UserModel(user_data);
-				new_user.setPassword(user_data.password);
-				user = await new_user.save();
-
-				if (user.email && setting.send_mail) {
-					let emailModule = new EmailModule(
-						"register_account",
-						"vi",
-						user_data.email
-					);
-					await emailModule.send_email({
-						full_name: user_data.fullname,
-						email: user_data.email
-					});
-				}
-			} else {
-				let data_update = {};
-				!user.email_verified && (data_update.email_verified = true);
-				!user.uid && (data_update.uid = data_apple.sub);
-				user.type_login !== "apple" && (data_update.type_login = "apple");
-				if (Object.keys(data_update).length > 0)
-					await UserModel.findOneAndUpdate(
-						{
-							_id: user._id
-						},
-						data_update
-					);
-			}
-			let token = await AuthController.generateToken({
-				id: user._id,
-				email: user.email,
-				uid: user.uid
-			});
-			let data = user.jsonData();
-			data.token = token;
-			data.first_login = first_login;
-			data.need_otp = setting.need_otp;
 			return res.status(200).send(data);
 		} catch (error) {
 			console.log(error);
@@ -226,7 +126,6 @@ class AuthController {
 				return res.status(422).send({
 					error: "google-login-failed"
 				});
-			let setting = await SettingModel.findOne({});
 			let user = await UserModel.findOne({
 				$or: [
 					{ email: data_google.email },
@@ -246,23 +145,9 @@ class AuthController {
 					uid: data_google.sub,
 					email_verified: true
 				};
-				let language = await LanguageModel.findOne({ locale: "vi" });
-				user_data.language = language._id;
 				let new_user = new UserModel(user_data);
 				new_user.setPassword(user_data.password);
 				user = await new_user.save();
-
-				if (user.email && setting.send_mail) {
-					let emailModule = new EmailModule(
-						"register_account",
-						"vi",
-						user_data.email
-					);
-					await emailModule.send_email({
-						full_name: user_data.fullname,
-						email: user_data.email
-					});
-				}
 			} else {
 				let data_update = {};
 				!user.email_verified && (data_update.email_verified = true);
@@ -284,7 +169,6 @@ class AuthController {
 			let data = user.jsonData();
 			data.token = token;
 			data.first_login = first_login;
-			data.need_otp = setting.need_otp;
 			return res.status(200).send(data);
 		} catch (error) {
 			console.log(error);
@@ -301,25 +185,6 @@ class AuthController {
 			return token;
 		} catch (error) {
 			console.log(error);
-		}
-	}
-	static async phone(req, res) {
-		let { uid, phone } = req.body;
-		try {
-			let user = await FirebaseModule.getUserPhone({ uid, phone });
-			if (!user) return res.status(404).send({ error: "user-phone-not-found" });
-			return res.status(200).send({ message: "user-phone-verified" });
-		} catch (error) {
-			console.log(error);
-			return res.status(400).send(error);
-		}
-	}
-	static async getAccount(req, res) {
-		try {
-			let user = await UserModel.find();
-			if (user) return res.status(200).send(user);
-		} catch (error) {
-			return res.status(400).send(error);
 		}
 	}
 }
