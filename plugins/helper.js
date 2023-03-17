@@ -70,6 +70,16 @@ class Helper {
 	static typeValue(value) {
 		return Object.prototype.toString.call(value).slice(8, -1);
 	}
+	static generateFileName(originalname, mimetype) {
+		let mimetypearr = mimetype.split("/");
+		var splitName = originalname.split(".");
+		let extension = splitName[splitName.length - 1];
+		extension = extension.toLowerCase();
+		if (mimetypearr[1] === "jpeg" && extension === "heic") extension = "jpeg";
+		let hashfile = sha256(originalname);
+		var unique = Math.random().toString(36).substring(7) + "_" + Date.now();
+		return `${hashfile}_${unique}.${extension}`;
+	}
 }
 
 module.exports = Helper;
