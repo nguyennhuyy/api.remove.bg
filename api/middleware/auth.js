@@ -31,14 +31,6 @@ const isRevokedCallbackUser = async function (req, payload, done) {
 };
 
 const auth = {
-	optional: jwt({
-		secret: process.env.JWT_SECRET_USER,
-		userProperty: "payload",
-		getToken: getTokenFromHeaders,
-		credentialsRequired: false,
-		isRevoked: isRevokedCallbackOption,
-		algorithm: ["RS256"]
-	}),
 	user: jwt({
 		secret: process.env.JWT_SECRET_USER,
 		userProperty: "payload",
