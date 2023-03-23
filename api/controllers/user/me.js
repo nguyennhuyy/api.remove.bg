@@ -15,11 +15,9 @@ class MeController {
 	}
 	static async updateInfo(req, res) {
 		try {
-			const { avatar, coverimage, birthday, fullname, address, gender } =
-				req.body;
+			const { avatar, birthday, fullname, address, gender } = req.body;
 			let data = {
 				avatar,
-				coverimage,
 				birthday,
 				fullname,
 				address,
@@ -27,7 +25,6 @@ class MeController {
 			};
 
 			avatar && new URL(avatar);
-			coverimage && new URL(coverimage);
 
 			validation.userSave.validateAsync(data);
 			typeof gender === "undefined" && (data.gender = null);
