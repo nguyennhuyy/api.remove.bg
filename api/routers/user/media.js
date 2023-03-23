@@ -1,5 +1,5 @@
 const express = require("express");
-const uploadCloud = require("../../../plugins/cloudinary");
+const { uploadCloud } = require("../../../plugins/cloudinary");
 const MediaController = require("../../controllers/user/media");
 const Media = express.Router();
 Media.post(

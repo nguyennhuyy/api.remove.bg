@@ -10,8 +10,12 @@ class MediaController {
 		try {
 			await Promise.all(
 				req.files.map(async file => {
+					let data = await cloudinary.uploader.upload(file.path);
+					let reg = new RegExp(`/upload/(v[0-9]+)/(${data.public_id}.*)`);
+					let regExec = reg.exec(data.url);
+					let path = `${process.env.MEDIA_PUBLISH}/cloud/${process.env.CLOUDINARY_NAME}/uid/${regExec[1]}/${regExec[2]}`;
 					return res.status(200).send({
-						image: file.path
+						image: path
 					});
 				})
 			);
