@@ -26,6 +26,7 @@ const isRevokedCallbackUser = async function (req, payload, done) {
 		if (payload.time) options.time = payload.time;
 		return done(null);
 	} catch (error) {
+		console.log(">>> error");
 		return done({ status: 401, error });
 	}
 };

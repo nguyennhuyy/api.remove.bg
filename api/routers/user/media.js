@@ -4,7 +4,7 @@ const MediaController = require("../../controllers/user/media");
 const Media = express.Router();
 Media.post(
 	"/media/cloud/upload",
-	uploadCloud.array("image"),
+	uploadCloud.single("image"),
 	MediaController.cloudUpload
 );
 module.exports = Media;
