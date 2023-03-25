@@ -25,7 +25,6 @@ class MeController {
 			};
 
 			avatar && new URL(avatar);
-
 			validation.userSave.validateAsync(data);
 			typeof gender === "undefined" && (data.gender = null);
 			let user = await UserModel.findOneAndUpdate(
@@ -39,6 +38,7 @@ class MeController {
 			if (!user) return res.status(404).send({ error: "user-not-found" });
 			return res.status(200).send(user);
 		} catch (error) {
+			console.log(">>> err", error);
 			return res.status(400).send(error);
 		}
 	}
