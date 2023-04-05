@@ -7,4 +7,5 @@ Media.post(
 	uploadCloud.single("image"),
 	MediaController.cloudUpload
 );
+Media.post("/media/removebg", MediaController.removeBg);
 module.exports = Media;
