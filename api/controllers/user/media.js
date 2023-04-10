@@ -5,8 +5,8 @@ const convert = require("heic-convert");
 const { cloudinary } = require("../../../plugins/cloudinary");
 const Rimraf = require("rimraf");
 const RemoveBg = require("remove.bg");
+const ImageRemoveModel = require("../../models/ImageRemove");
 
-console.log(">> RemoveBg", RemoveBg);
 class MediaController {
 	static async cloudUpload(req, res) {
 		try {
@@ -22,15 +22,31 @@ class MediaController {
 	static async removeBg(req, res) {
 		try {
 			const { url } = req.body;
+			let remove_img = await ImageRemoveModel.findOne({ url: url });
+
+			if (remove_img) {
+				return res.status(200).send({
+					base64img: remove_img.img_base64
+				});
+			}
 			let data = await RemoveBg.removeBackgroundFromImageUrl({
 				url,
 				apiKey: process.env.API_KEY,
 				size: "regular",
-				type: "person"
+				type: "auto"
 			});
 			if (data) {
-				return res.status(200).send({
-					base64img: data.base64img
+				let opt = {
+					uid: req.payload.id,
+					name_img: data.rateLimitReset,
+					img_base64: data.base64img,
+					size_img: `${data.resultWidth} x ${data.resultHeight}`
+				};
+				let save = new ImageRemoveModel({ ...opt });
+				save.save().then(() => {
+					return res.status(200).send({
+						base64img: data.base64img
+					});
 				});
 			}
 		} catch (error) {
