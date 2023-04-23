@@ -5,5 +5,6 @@ Auth.post("/auth/register", AuthController.register);
 Auth.post("/auth/login", AuthController.login);
 Auth.post("/auth/facebook/login", AuthController.loginFacebook);
 Auth.post("/auth/google/login", AuthController.loginGoogle);
-
+Auth.post("/auth/forgot-password", AuthController.fotgotPassword);
+Auth.post("/auth/reset-password", AuthController.resetPassword);
 module.exports = Auth;

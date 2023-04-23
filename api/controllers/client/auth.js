@@ -3,6 +3,9 @@ const crypto = require("crypto");
 const { register, login } = require("../../validations/auth");
 const UserModel = require("../../models/User");
 const Fetch = require("../../../plugins/fetch");
+
+const OtpModule = require("../../models/GenerateOtp");
+const EmailModule = require("../../models//Email");
 class AuthController {
 	static async register(req, res) {
 		let { email, fullname, password } = req.body;
@@ -185,6 +188,67 @@ class AuthController {
 			return token;
 		} catch (error) {
 			console.log(error);
+		}
+	}
+	static async fotgotPassword(req, res) {
+		try {
+			let { email } = req.body;
+			let user = await UserModel.findOne({
+				email: email.trim().toLowerCase()
+			});
+			if (!user)
+				return res.status(404).json({
+					error: "user-not-found"
+				});
+
+			let generator = await OtpModule.generatorForgotPassword({
+				email: email.trim().toLowerCase(),
+				type: "forgot_password"
+			});
+			if (generator.status === "new") {
+				let emailSend = new EmailModule("forgot_password", "vi", email);
+				console.log(emailSend);
+				await emailSend.sendEmail({
+					fullname: user.fullname,
+					subject: "Quên mật khẩu",
+					email: user.email,
+					codeOtp: generator.otp
+				});
+			}
+
+			return res.status(201).json({ message: "send email success" });
+		} catch (error) {
+			console.error(error);
+		}
+	}
+	static async resetPassword(req, res) {
+		try {
+			let { password, code, email } = req.body;
+			let user = await UserModel.findOne({
+				email
+			});
+			if (!user)
+				return res.status(404).send({
+					error: "user-not-found"
+				});
+
+			let status = await OtpModule.verify({
+				code,
+				type: "forgot_password",
+				email
+			});
+			if (!status)
+				return res.status(404).send({
+					error: "code-not-verify"
+				});
+			user.updatePassword = password;
+			await user.save();
+			return res.status(201).json(user);
+		} catch (error) {
+			console.error(error);
+			return res.status(401).send({
+				error: "change-password-error"
+			});
 		}
 	}
 }
